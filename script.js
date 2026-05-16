@@ -1,5 +1,3 @@
-const REPO_OWNER = 'neb1'; // Your GitHub username
-const REPO_NAME = 'neb1neuron-art'; // Your repo name
 // Auto-detect repository details from the URL
 // If testing locally, replace these strings with your actual username and repo name
 const pathParts = window.location.pathname.split('/').filter(part => part.length > 0);
@@ -20,7 +18,6 @@ const nextBtn = document.getElementById('next-btn');
 
 async function fetchImages() {
     try {
-        const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMAGES_PATH}`);
         const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMAGES_PATH}`;
         console.log("Fetching gallery from:", apiUrl);
 
