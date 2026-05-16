@@ -1,5 +1,12 @@
 const REPO_OWNER = 'neb1'; // Your GitHub username
 const REPO_NAME = 'neb1neuron-art'; // Your repo name
+// Auto-detect repository details from the URL
+// If testing locally, replace these strings with your actual username and repo name
+const pathParts = window.location.pathname.split('/').filter(part => part.length > 0);
+const REPO_OWNER = window.location.hostname.includes('github.io') 
+    ? window.location.hostname.split('.')[0] 
+    : 'neb1'; 
+const REPO_NAME = pathParts[0] || 'neb1neuron-art';
 const IMAGES_PATH = 'images';
 
 let images = [];
@@ -14,8 +21,21 @@ const nextBtn = document.getElementById('next-btn');
 async function fetchImages() {
     try {
         const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMAGES_PATH}`);
+        const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${IMAGES_PATH}`;
+        console.log("Fetching gallery from:", apiUrl);
+
+        const response = await fetch(apiUrl);
         const data = await response.json();
         
+        if (!response.ok) {
+            console.error("GitHub API Response:", data);
+            throw new Error(`GitHub API returned ${response.status}: ${data.message}`);
+        }
+
+        if (!Array.isArray(data)) {
+            throw new Error("Unexpected response format from GitHub API.");
+        }
+
         // Filter for images and sort descending (z to a) to show latest first
         images = data
             .filter(file => /\.(jpe?g|png|gif|webp)$/i.test(file.name))
