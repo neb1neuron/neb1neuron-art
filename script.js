@@ -49,20 +49,43 @@ async function fetchImages() {
     }
 }
 
+/**
+ * Preloads an image into the browser cache
+ */
+function preloadImage(index) {
+    if (index >= 0 && index < images.length) {
+        const img = new Image();
+        img.src = images[index].download_url;
+    }
+}
+
 function displayImage(index) {
     currentIndex = index;
     const image = images[index];
     
-    // Fade out effect
+    // 1. Start fade out of the current image
     mainImage.style.opacity = 0;
     
+    // 2. Preload adjacent images (buffer)
+    // We wrap around using modulo for a continuous loop experience
+    preloadImage((index + 1) % images.length);
+    preloadImage((index - 1 + images.length) % images.length);
+    
+    // 3. Wait for the fade-out transition (0.3s) before switching the source
     setTimeout(() => {
-        mainImage.src = image.download_url;
-        // Clean up filename for caption (remove extension and replace dashes with spaces)
-        const displayName = image.name.split('.')[0].replace(/[-_]/g, ' ');
-        caption.textContent = displayName;
-        counter.textContent = `${currentIndex + 1} / ${images.length}`;
-        mainImage.style.opacity = 1;
+        // Create a temporary image object to check when the file is ready
+        const tempImg = new Image();
+        tempImg.onload = () => {
+            mainImage.src = image.download_url;
+            
+            const displayName = image.name.split('.')[0].replace(/[-_]/g, ' ');
+            caption.textContent = displayName;
+            counter.textContent = `${currentIndex + 1} / ${images.length}`;
+            
+            // 4. Only fade back in once the browser has the new image ready
+            mainImage.style.opacity = 1;
+        };
+        tempImg.src = image.download_url;
     }, 300);
 }
 
